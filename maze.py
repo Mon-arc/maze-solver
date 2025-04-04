@@ -26,6 +26,47 @@ class Maze:
         if seed is not None:
             random.seed(seed)
 
+    def solve(self) -> bool:
+        return self._solve_r(0, 0)
+
+    def _solve_r(self, i, j) -> bool:
+        self._animate()
+        self._cells[i][j].visited = True
+        if i == self._num_cols - 1 and j == self._num_rows - 1:
+            return True
+
+        if i < self._num_cols and not self._cells[i][j].has_right_wall and self._cells[i+1][j].visited == False:
+            self._cells[i][j].draw_move(self._cells[i+1][j])
+            if self._solve_r(i+1, j):
+                return True
+            else:
+                self._cells[i][j].draw_move(self._cells[i+1][j], undo=True)
+
+        if i > 0 and not self._cells[i][j].has_left_wall and self._cells[i-1][j].visited == False:
+            self._cells[i][j].draw_move(self._cells[i-1][j])
+            if self._solve_r(i-1, j):
+                return True
+            else:
+                self._cells[i][j].draw_move(self._cells[i-1][j], undo=True)
+                
+        if j > 0 and not self._cells[i][j].has_top_wall and self._cells[i][j-1].visited == False:
+            self._cells[i][j].draw_move(self._cells[i][j-1])
+            if self._solve_r(i, j-1):
+                return True
+            else:
+                self._cells[i][j].draw_move(self._cells[i][j-1], undo=True)
+
+        if j < self._num_rows - 1 and not self._cells[i][j].has_bottom_wall and self._cells[i][j+1].visited == False:
+            self._cells[i][j].draw_move(self._cells[i][j+1])
+            if self._solve_r(i, j+1):
+                return True
+            else:
+                self._cells[i][j].draw_move(self._cells[i][j+1], undo=True)
+
+        return False
+
+
+
     def _break_walls_r(self, i, j):
         self._cells[i][j].visited = True
         to_break = ""
@@ -55,18 +96,21 @@ class Maze:
                 # Removing both walls that are in between two cells is not necessary,
                 # but i'm doing it just in case something changes
                 # where the white isn't drawn over the black lines
+                # Could be an issue later with depth-first-search algo
+                # (It was indeed an issue)
+
                 if direction[2] == 'left':
                     self._cells[i][j].has_left_wall = False
-                    self._cells[i-1][j].has_right_wall = False
+                    # self._cells[i-1][j].has_right_wall = False
                 elif direction[2] == 'right':
                     self._cells[i][j].has_right_wall = False
-                    self._cells[i+1][j].has_left_wall = False
+                    # self._cells[i+1][j].has_left_wall = False
                 elif direction[2] == 'up':
                     self._cells[i][j].has_top_wall = False
-                    self._cells[i][j-1].has_bottom_wall = False
+                    # self._cells[i][j-1].has_bottom_wall = False
                 elif direction[2] == 'down':
                     self._cells[i][j].has_bottom_wall = False
-                    self._cells[i][j+1].has_top_wall = False
+                    # self._cells[i][j+1].has_top_wall = False
 
                 self._break_walls_r(direction[0], direction[1])
 
@@ -101,7 +145,7 @@ class Maze:
         if self._win is None:
             return
         self._win.redraw()
-        time.sleep(0.05)
+        time.sleep(0.025)
 
     def _break_entrance_and_exit(self):
         self._cells[0][0].has_top_wall = False
