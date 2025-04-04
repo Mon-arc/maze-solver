@@ -39,7 +39,7 @@ class Line():
 
     def draw(self, canvas, fill_color):
         canvas.create_line(
-            self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=fill_color, width=5)
+            self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=fill_color, width=2.5)
 
 class Cell:
 
@@ -54,6 +54,7 @@ class Cell:
         self._x2 = None
         self._y2 = None
         self._win = win
+        self.visited = False
 
     def draw(self, x1, y1, x2, y2, fill_color="black"):
         self._x1 = x1
